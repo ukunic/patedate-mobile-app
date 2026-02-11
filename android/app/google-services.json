@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "132646550611",
+    "project_id": "patedate-ce7e7",
+    "storage_bucket": "patedate-ce7e7.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:132646550611:android:d9cd12e57541bcbcc85aa6",
+        "android_client_info": {
+          "package_name": "com.example.patedate"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDNXxCiyal4K4BB08nF5KcGTAZvdTihysk"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
