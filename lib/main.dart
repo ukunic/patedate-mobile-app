@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
 
 import 'core/theme/app_theme.dart';
-import 'shared/widgets/app_scaffold.dart';
+import 'features/auth/presentation/auth_gate.dart';
 import 'firebase_options.dart';
 
 Future<void> main() async {
@@ -22,7 +22,7 @@ class PateDateApp extends StatelessWidget {
       title: 'PateDate',
       debugShowCheckedModeBanner: false,
       theme: AppTheme.light(),
-      home: const AppScaffold(),
+      home: const AuthGate(),
     );
   }
 }
