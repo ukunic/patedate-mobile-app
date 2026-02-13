@@ -1,55 +1,53 @@
 import 'package:flutter/material.dart';
 
+import '../../pets/data/pet.dart';
+import '../data/discover_repository.dart';
+import 'pet_detail_page.dart';
+import 'widgets/pet_card.dart';
+
 class DiscoverPage extends StatelessWidget {
   const DiscoverPage({super.key});
 
   @override
   Widget build(BuildContext context) {
-    return const _SimplePage(
-      title: 'Keşfet',
-      subtitle: 'Kartlar burada olacak (Gün 5-6)',
-      icon: Icons.pets,
-    );
-  }
-}
+    final repo = DiscoverRepository();
 
-class _SimplePage extends StatelessWidget {
-  final String title;
-  final String subtitle;
-  final IconData icon;
+    return Scaffold(
+      appBar: AppBar(title: const Text('Discover')),
+      body: StreamBuilder<List<Pet>>(
+        stream: repo.watchDiscoverPets(),
+        builder: (context, snapshot) {
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            return const Center(child: CircularProgressIndicator());
+          }
 
-  const _SimplePage({
-    required this.title,
-    required this.subtitle,
-    required this.icon,
-  });
+          final pets = snapshot.data ?? [];
+          if (pets.isEmpty) {
+            return const Center(child: Text('No pets yet. Add more users 😄'));
+          }
 
-  @override
-  Widget build(BuildContext context) {
-    return Center(
-      child: Padding(
-        padding: const EdgeInsets.all(20),
-        child: Card(
-          child: Padding(
-            padding: const EdgeInsets.all(20),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Icon(icon, size: 48),
-                const SizedBox(height: 10),
-                Text(
-                  title,
-                  style: Theme.of(context).textTheme.headlineSmall,
+          return ListView.builder(
+            padding: const EdgeInsets.all(16),
+            itemCount: pets.length,
+            itemBuilder: (context, i) {
+              final pet = pets[i];
+              return Padding(
+                padding: const EdgeInsets.only(bottom: 12),
+                child: PetCard(
+                  pet: pet,
+                  onTap: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (_) => PetDetailPage(pet: pet),
+                      ),
+                    );
+                  },
                 ),
-                const SizedBox(height: 6),
-                Text(
-                  subtitle,
-                  textAlign: TextAlign.center,
-                ),
-              ],
-            ),
-          ),
-        ),
+              );
+            },
+          );
+        },
       ),
     );
   }
