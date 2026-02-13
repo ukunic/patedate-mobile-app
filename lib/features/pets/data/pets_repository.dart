@@ -76,4 +76,22 @@ class PetsRepository {
 
     await _firestore.collection('pets').doc(petId).set(pet.toMap());
   }
+
+  Future<List<Pet>> getMyPetsOnce() async {
+    final snap = await _firestore
+        .collection('pets')
+        .where('ownerId', isEqualTo: _uid)
+        .get();
+
+    final pets = snap.docs.map((d) => Pet.fromMap(d.id, d.data())).toList()
+      ..sort((a, b) => a.name.compareTo(b.name));
+    return pets;
+  }
+  Future<Pet?> getPetById(String petId) async {
+    final doc = await _firestore.collection('pets').doc(petId).get();
+    if (!doc.exists) return null;
+    return Pet.fromMap(doc.id, doc.data()!);
+  }
+
 }
+
