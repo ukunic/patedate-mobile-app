@@ -2,6 +2,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 
+import '../../chat/presentation/chat_page.dart';
 import '../../pets/data/pet.dart';
 import '../../pets/data/pets_repository.dart';
 import '../data/match_repository.dart';
@@ -36,17 +37,22 @@ class MatchesPage extends StatelessWidget {
             padding: const EdgeInsets.all(16),
             itemCount: docs.length,
             itemBuilder: (context, i) {
-              final match = docs[i].data();
-              final pets = (match['pets'] as List?)?.map((e) => e.toString()).toList() ?? [];
-              if (pets.length < 2) {
-                return const SizedBox.shrink();
-              }
+              final matchDoc = docs[i];
+              final matchId = matchDoc.id;
+              final match = matchDoc.data();
 
-              // MVP: kendi petim = pets[0], diğer pet = pets[1] gibi varsaymak yerine:
-              // Match doc id'si kullanıcıları içeriyor ama petlerden hangisi kime ait bilinmiyor.
-              // Bu yüzden 2 pet'i de çekip "ownerId != uid" olanı karşı taraf sayıyoruz.
+              final pets = (match['pets'] as List?)
+                  ?.map((e) => e.toString())
+                  .toList() ??
+                  [];
+
+              if (pets.length < 2) return const SizedBox.shrink();
+
               return FutureBuilder<List<Pet?>>(
-                future: Future.wait([petsRepo.getPetById(pets[0]), petsRepo.getPetById(pets[1])]),
+                future: Future.wait([
+                  petsRepo.getPetById(pets[0]),
+                  petsRepo.getPetById(pets[1]),
+                ]),
                 builder: (context, petSnap) {
                   if (!petSnap.hasData) {
                     return const Padding(
@@ -59,22 +65,16 @@ class MatchesPage extends StatelessWidget {
                   final p1 = petSnap.data![1];
 
                   Pet? other;
-                  Pet? mine;
 
                   if (p0 != null && p0.ownerId == uid) {
-                    mine = p0;
                     other = p1;
                   } else if (p1 != null && p1.ownerId == uid) {
-                    mine = p1;
                     other = p0;
                   } else {
-                    // ownerId bulunamadıysa fallback
                     other = p0 ?? p1;
                   }
 
-                  if (other == null) {
-                    return const SizedBox.shrink();
-                  }
+                  if (other == null) return const SizedBox.shrink();
 
                   return Padding(
                     padding: const EdgeInsets.only(bottom: 12),
@@ -83,15 +83,27 @@ class MatchesPage extends StatelessWidget {
                         leading: ClipRRect(
                           borderRadius: BorderRadius.circular(10),
                           child: (other.photoUrl != null && other.photoUrl!.isNotEmpty)
-                              ? Image.network(other.photoUrl!, width: 48, height: 48, fit: BoxFit.cover)
-                              : const SizedBox(width: 48, height: 48, child: Icon(Icons.pets)),
+                              ? Image.network(
+                            other.photoUrl!,
+                            width: 48,
+                            height: 48,
+                            fit: BoxFit.cover,
+                          )
+                              : const SizedBox(
+                            width: 48,
+                            height: 48,
+                            child: Icon(Icons.pets),
+                          ),
                         ),
                         title: Text(other.name),
                         subtitle: Text('${other.type}${other.city != null ? " • ${other.city}" : ""}'),
                         trailing: const Icon(Icons.chat_bubble_outline),
                         onTap: () {
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(content: Text('Chat Day 8’de geliyor 💬')),
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (_) => ChatPage(matchId: matchId),
+                            ),
                           );
                         },
                       ),
